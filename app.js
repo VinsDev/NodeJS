@@ -12,7 +12,7 @@ const app = express();
 const port = 3001;
 
 // Define a route to fetch data from Firestore
-app.get('/getData', async (req, res) => {
+app.get('/getUsers', async (req, res) => {
     try {
         const db = admin.firestore();
         const data = await db.collection('users').get();
