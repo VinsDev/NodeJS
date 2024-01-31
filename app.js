@@ -9,6 +9,7 @@ admin.initializeApp({
 });
 
 const app = express();
+app.use(express.json());
 const port = 3001;
 
 // Define a route to fetch data from Firestore
@@ -20,6 +21,33 @@ app.get('/getUsers', async (req, res) => {
     } catch (error) {
         console.error('Error fetching data from Firestore:', error);
         res.status(500).send('Internal Server Error');
+    }
+});
+
+app.post('/createRequest', async (req, res) => {
+    try {
+        const { phoneNumber } = req.body;
+        if (!phoneNumber) {
+            return res.status(400).json({ error: 'Phone number is required.' });
+        }
+
+        const db = admin.firestore();
+        const requestsCollection = db.collection('requests');
+        const defaultStatus = 'pending';
+
+        // Get the current server timestamp
+        const serverTimestamp = admin.firestore.Timestamp.now();
+
+        await requestsCollection.add({
+            number: phoneNumber,
+            status: defaultStatus,
+            creationTime: serverTimestamp,
+        });
+
+        res.status(200).json({ success: true, message: 'Phone number added to requests.' });
+    } catch (error) {
+        console.error('Error adding request to Firestore:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
