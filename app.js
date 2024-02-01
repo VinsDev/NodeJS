@@ -108,6 +108,57 @@ app.post('/generateOTP', async (req, res) => {
     }
 });
 
+app.post('/verifyOTP', async (req, res) => {
+    try {
+        const { phoneNumber, otpCode } = req.body;
+
+        // Validate phone number format and OTP format
+        if (!phoneNumber || !otpCode || !isValidOTP(otpCode)) {
+            return res.status(400).json({ error: 'Invalid phone number or OTP format.' });
+        }
+
+        const db = admin.firestore();
+        const otpsCollection = db.collection('otp');
+        const historyCollection = db.collection('history');
+
+        // Check if the provided OTP is valid for the given phone number
+        const otpQuery = await otpsCollection
+            .where('phoneNumber', '==', phoneNumber)
+            .where('code', '==', otpCode)
+            // .where('expirationDate', '>=', new Date().toISOString())
+            .get();
+
+        const validOTP = !otpQuery.empty;
+
+        if (validOTP) {
+            // OTP is valid, you can proceed with your authentication logic here
+            const otpDoc = otpQuery.docs[0].data();
+            await historyCollection.add({
+                code: otpDoc.code,
+                phoneNumber: otpDoc.phoneNumber,
+                verificationTime: admin.firestore.FieldValue.serverTimestamp(),
+            });
+
+            // Optional: Delete the used OTP from the collection
+            const otpDocId = otpQuery.docs[0].id;
+            await otpsCollection.doc(otpDocId).delete();
+
+            res.status(200).json({ success: true, message: 'OTP verified successfully.' });
+        } else {
+            res.status(400).json({ error: 'Invalid OTP or expired.' });
+        }
+    } catch (error) {
+        console.error('Error verifying OTP:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Validate OTP format (4 digits)
+function isValidOTP(otpCode) {
+    return /^\d{4}$/.test(otpCode);
+}
+
+
 // Start the Express server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
