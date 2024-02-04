@@ -12,6 +12,10 @@ const app = express();
 app.use(express.json());
 const port = 3001;
 
+// const accountSid = 'AC9005a65c8c8e9bf0aa2beea638b6ac6b';
+// const authToken = '8ec72710009565a288131cd3fde2b9cd';
+// const client = require('twilio')(accountSid, authToken);
+
 // Define a route to fetch data from Firestore
 app.get('/getUsers', async (req, res) => {
     try {
@@ -76,6 +80,13 @@ app.post('/generateOTP', async (req, res) => {
 
             // Extract phone number directly from the userQuery
             const userPhone = userQuery.docs[0].data().phone;
+
+            /*  client.messages
+                 .create({
+                     body: 'Welcome! Your OTP for the JOSTUM Door lock system is ' + otpCode + '. Please do not share this code with anyone.',
+                     from: '+18155545142',
+                     to: '+234'+ userPhone.slice(1)
+                 }); */
 
             // Add OTP to the OTP collection
             await otpsCollection.add({
