@@ -1,5 +1,6 @@
 const express = require('express');
 const admin = require('firebase-admin');
+const multer = require('multer');
 const serviceAccount = require('./door-lock-d75e2-firebase-adminsdk-epapy-4d41e2d8cb.json');
 
 // Initialize Firebase Admin SDK
@@ -7,6 +8,10 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: 'https://door-lock-d75e2.firebaseio.com',
 });
+
+// Set up Multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const app = express();
 app.use(express.json());
@@ -160,6 +165,28 @@ app.post('/verifyOTP', async (req, res) => {
         }
     } catch (error) {
         console.error('Error verifying OTP:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.post('/uploadImage', upload.single('image'), async (req, res) => {
+    try {
+        const db = admin.firestore();
+        const imagesCollection = db.collection('images');
+
+        // Convert the image to base64
+        const imageBuffer = req.file.buffer;
+        const base64Image = imageBuffer.toString('base64');
+
+        // Save the base64 image to the "images" collection
+        await imagesCollection.add({
+            image: base64Image,
+            uploadTime: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        res.status(200).json({ success: true, message: 'Image uploaded successfully.' });
+    } catch (error) {
+        console.error('Error uploading image:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
