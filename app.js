@@ -169,14 +169,13 @@ app.post('/verifyOTP', async (req, res) => {
     }
 });
 
-app.post('/uploadImage', upload.single('image'), async (req, res) => {
+app.post('/uploadImage', async (req, res) => {
     try {
         const db = admin.firestore();
         const imagesCollection = db.collection('images');
 
-        // Convert the image to base64
-        const imageBuffer = req.file.buffer;
-        const base64Image = imageBuffer.toString('base64');
+        // Extract base64-encoded image from the request body
+        const base64Image = req.body.image;
 
         // Save the base64 image to the "images" collection
         await imagesCollection.add({
