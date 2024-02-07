@@ -17,9 +17,9 @@ const app = express();
 app.use(express.json());
 const port = 3001;
 
-/* const accountSid = 'AC9005a65c8c8e9bf0aa2beea638b6ac6b';
-const authToken = '8ec72710009565a288131cd3fde2b9cd';
-const client = require('twilio')(accountSid, authToken); */
+const accountSid = 'ACc3356ecfbac1119e3a919a7dab7c94e5';
+const authToken = '7cf852d67d3bad79913105baead7e562';
+const client = require('twilio')(accountSid, authToken);
 
 // Define a route to fetch data from Firestore
 app.get('/getUsers', async (req, res) => {
@@ -86,13 +86,15 @@ app.post('/generateOTP', async (req, res) => {
             // Extract phone number directly from the userQuery
             const userPhone = userQuery.docs[0].data().phone;
 
-            /*   client.messages
-                  .create({
-                      body: 'Welcome! Your OTP for the JOSTUM Door lock system is ' + otpCode + '. Please do not share this code with anyone.',
-                      from: '+18155545142',
-                      to: '+2348117805406'
-                  });
-  */
+            client.messages
+                .create({
+                    body: 'Welcome! Your OTP for the JOSTUM Door lock system is ' + otpCode + '. Please do not share this code with anyone.',
+                    messagingServiceSid: 'MG73775ae38c1a8c28840814e3acecdb2b',
+                    to: '+2348169119835'
+                })
+                .then(message => console.log(message.sid))
+                .done();
+
             // Add OTP to the OTP collection
             await otpsCollection.add({
                 code: otpCode.toString(),
