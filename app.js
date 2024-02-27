@@ -17,8 +17,8 @@ const app = express();
 app.use(express.json());
 const port = 3001;
 
-const accountSid = 'ACc3356ecfbac1119e3a919a7dab7c94e5';
-const authToken = '7cf852d67d3bad79913105baead7e562';
+const accountSid = 'ACccca998b4149b161ef8124eedbe4ee4f';
+const authToken = 'e3b898f5e02a480d6f2970485b074a53';
 const client = require('twilio')(accountSid, authToken);
 
 // Define a route to fetch data from Firestore
@@ -89,7 +89,7 @@ app.post('/generateOTP', async (req, res) => {
             client.messages
                 .create({
                     body: 'Welcome! Your OTP for the JOSTUM Door lock system is ' + otpCode + '. Please do not share this code with anyone.',
-                    messagingServiceSid: 'MG73775ae38c1a8c28840814e3acecdb2b',
+                    from: '+16506562944',
                     to: '+2348169119835'
                 })
                 .then(message => console.log(message.sid))
